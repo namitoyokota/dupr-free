@@ -1,6 +1,8 @@
 # DUPR Free Chrome extension
 
-> I vibe-coded this project, so I have no idea what's inside this codebase.
+![Thumbnail](./assets/thumbnail.png)
+
+## Why
 
 DUPR Free displays the profile and ratings for the player whose profile is open
 in the DUPR dashboard. It runs only when you click the extension on a URL like
@@ -14,3 +16,7 @@ in the DUPR dashboard. It runs only when you click the extension on a URL like
 4. Open a player profile on `dashboard.dupr.com` while signed in.
 5. Click the extensions puzzle icon and pin **DUPR Free** if desired.
 6. Click **DUPR Free** to show that player's details and ratings.
+
+## Fair warning
+
+I vibe-coded this project, so I have no idea what's inside this codebase.
