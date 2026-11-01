@@ -279,6 +279,153 @@ h1 {
   letter-spacing: 0.06em;
 }
 
+.history-section {
+  margin-top: 20px;
+}
+
+.history-section h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.history-message {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.match-card {
+  padding: 13px;
+}
+
+.match-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-outcome {
+  margin: 0;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.match-outcome.loss {
+  color: #b91c1c;
+}
+
+.match-event {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.match-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.match-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.match-team.is-winner {
+  font-weight: 600;
+}
+
+.team-players {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 5px;
+}
+
+.team-player {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: var(--foreground);
+  font-size: 10px;
+  text-decoration: none;
+}
+
+.team-player:hover .team-player-name {
+  text-decoration: underline;
+}
+
+.team-player img,
+.team-avatar-fallback {
+  width: 23px;
+  height: 23px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.team-avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+
+.team-player-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-player-rating {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.team-player-rating-after.rating-increase {
+  color: #15803d;
+}
+
+.team-player-rating-after.rating-decrease {
+  color: #b91c1c;
+}
+
+.team-player-rating-change {
+  color: var(--muted-foreground);
+}
+
+.team-score {
+  min-width: 18px;
+  color: var(--foreground);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 [hidden] {
   display: none !important;
 }
