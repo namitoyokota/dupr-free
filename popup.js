@@ -326,7 +326,7 @@ async function loadPlayer(playerId) {
   const isCurrentLoad = () => generation === loadGeneration;
   if (!/^\d+$/.test(String(playerId))) {
     showError("Couldn't load player", "The player ID is invalid.");
-    return;
+    return false;
   }
 
   let tab;
@@ -342,11 +342,11 @@ async function loadPlayer(playerId) {
         error instanceof Error ? error.message : "Please try again.",
       );
     }
-    return;
+    return false;
   }
   if (!tab?.id || !tab.url) {
     showError("No active page", "Open a DUPR player profile, then click DUPR Free.");
-    return;
+    return false;
   }
 
   let url;
@@ -354,14 +354,14 @@ async function loadPlayer(playerId) {
     url = new URL(tab.url);
   } catch {
     showError("Can't read this page", "Open a DUPR player profile, then try again.");
-    return;
+    return false;
   }
   if (url.origin !== "https://dashboard.dupr.com") {
     showError(
       "Open a DUPR player profile",
       "Open a player profile on dashboard.dupr.com, then try again.",
     );
-    return;
+    return false;
   }
 
   state.classList.remove("error");
@@ -376,7 +376,7 @@ async function loadPlayer(playerId) {
       func: fetchPlayer,
       args: [String(playerId)],
     });
-    if (!isCurrentLoad()) return;
+    if (!isCurrentLoad()) return false;
 
     const result = execution?.result;
     const playerResult = result?.player;
@@ -399,7 +399,7 @@ async function loadPlayer(playerId) {
           playerResult?.message || "Please try again from the player profile.",
         );
       }
-      return;
+      return false;
     }
 
     const payload = playerResult.payload;
@@ -413,7 +413,7 @@ async function loadPlayer(playerId) {
         "DUPR couldn't return this profile",
         payload?.message || "The response did not include a player profile.",
       );
-      return;
+      return false;
     }
 
     renderPlayer(payload.result);
@@ -432,6 +432,7 @@ async function loadPlayer(playerId) {
       singlesRatingHistoryMessage,
       singlesRatingChart,
     );
+    return true;
   } catch (error) {
     if (isCurrentLoad()) {
       showError(
@@ -441,12 +442,33 @@ async function loadPlayer(playerId) {
           : "Try again from the player profile.",
       );
     }
+    return false;
   }
 }
 
 async function navigateToPlayer(event, playerId) {
   event.preventDefault();
-  await loadPlayer(playerId);
+  if (!(await loadPlayer(playerId))) return;
+
+  try {
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
+    if (!tab?.id) {
+      showError("Couldn't open player profile", "No active tab was found.");
+      return;
+    }
+
+    await chrome.tabs.update(tab.id, {
+      url: `https://dashboard.dupr.com/dashboard/player/${encodeURIComponent(playerId)}`,
+    });
+  } catch (error) {
+    showError(
+      "Couldn't open player profile",
+      error instanceof Error ? error.message : "Please try again.",
+    );
+  }
 }
 
 function createTeamPlayer(player, team, position, isSingles) {
