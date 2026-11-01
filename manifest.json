@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "DUPR Free",
   "version": "1.0.0",
+  "minimum_chrome_version": "111",
   "description": "View a DUPR player's profile, ratings, and match history from their DUPR dashboard page.",
   "permissions": ["activeTab", "scripting"],
   "icons": {
@@ -17,5 +18,13 @@
       "16": "assets/icon-16.png",
       "32": "assets/icon-32.png"
     }
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://dashboard.dupr.com/*"],
+      "js": ["search-navigation.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    }
+  ]
 }

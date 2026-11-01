@@ -19,6 +19,8 @@ a URL like
 6. Click **DUPR Free** to show that player's details, ratings, and match history.
    Click a player in match history to update the popup with their profile
    without navigating the dashboard tab.
+7. On DUPR search results, clicking a player card navigates to their profile
+   page when the extension can identify their player ID from the page data.
 
 ## Fair warning
 
