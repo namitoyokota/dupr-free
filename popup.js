@@ -6,6 +6,16 @@ const avatarFallback = document.querySelector("#avatar-fallback");
 const historySection = document.querySelector("#match-history");
 const historyMessage = document.querySelector("#history-message");
 const historyList = document.querySelector("#history-list");
+const doublesRatingHistorySection = document.querySelector("#doubles-rating-history");
+const doublesRatingHistoryMessage = document.querySelector(
+  "#doubles-rating-history-message",
+);
+const doublesRatingChart = document.querySelector("#doubles-rating-chart");
+const singlesRatingHistorySection = document.querySelector("#singles-rating-history");
+const singlesRatingHistoryMessage = document.querySelector(
+  "#singles-rating-history-message",
+);
+const singlesRatingChart = document.querySelector("#singles-rating-chart");
 let loadGeneration = 0;
 
 function showError(title, detail) {
@@ -100,6 +110,215 @@ function formatMatchDate(value) {
     typeof value === "string" && value.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match) return "";
   return `${Number(match[2])}/${Number(match[3])}/${match[1]}`;
+}
+
+function createSvgElement(tag, attributes = {}) {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, value);
+  }
+  return element;
+}
+
+function renderRatingHistory(result, type, section, message, chart) {
+  section.hidden = false;
+  message.textContent = "";
+  chart.replaceChildren();
+
+  if (!result?.ok) {
+    message.textContent =
+      result?.message || "Couldn't load rating history.";
+    return;
+  }
+
+  const history = result.payload?.result?.ratingHistory;
+  if (result.payload?.status !== "SUCCESS" || !Array.isArray(history)) {
+    message.textContent =
+      result.payload?.message || "DUPR returned an unexpected rating history response.";
+    return;
+  }
+
+  const points = history
+    .filter(
+      (entry) =>
+        typeof entry.date === "string" &&
+        Number.isFinite(Number(entry.rating)) &&
+        entry.rating !== null,
+    )
+    .map((entry) => ({
+      date: entry.date,
+      timestamp: Date.parse(`${entry.date}T00:00:00Z`),
+      rating: Number(entry.rating),
+    }))
+    .filter((entry) => Number.isFinite(entry.timestamp))
+    .sort((first, second) => first.timestamp - second.timestamp);
+
+  if (points.length === 0) {
+    message.textContent = `No ${type.toLowerCase()} rating history found.`;
+    return;
+  }
+
+  const firstYear = new Date(points[0].timestamp).getUTCFullYear();
+  const lastYear = new Date(points.at(-1).timestamp).getUTCFullYear();
+  const width = 340;
+  const height = 150;
+  const margin = { top: 12, right: 12, bottom: 25, left: 42 };
+  const plotWidth = width - margin.left - margin.right;
+  const plotHeight = height - margin.top - margin.bottom;
+  let minRating = points[0].rating;
+  let maxRating = points[0].rating;
+  for (const point of points) {
+    minRating = Math.min(minRating, point.rating);
+    maxRating = Math.max(maxRating, point.rating);
+  }
+  let lowerRating = Math.floor(minRating * 2) / 2;
+  let upperRating = Math.ceil(maxRating * 2) / 2;
+  if (lowerRating === upperRating) {
+    lowerRating -= 0.5;
+    upperRating += 0.5;
+  }
+  const firstDate = points[0].timestamp;
+  const lastDate = points.at(-1).timestamp;
+  const dateRange = lastDate - firstDate;
+  const coordinates = points.map((point) => ({
+    x:
+      margin.left +
+      (dateRange === 0
+        ? 0
+        : ((point.timestamp - firstDate) / dateRange) * plotWidth),
+    y:
+      margin.top +
+      ((upperRating - point.rating) / (upperRating - lowerRating)) *
+        plotHeight,
+    ...point,
+  }));
+  const svg = createSvgElement("svg", {
+    viewBox: `0 0 ${width} ${height}`,
+    width,
+    height,
+    role: "group",
+    "aria-label": `${type} DUPR history from ${formatMatchDate(points[0].date)} to ${formatMatchDate(points.at(-1).date)}, ${points.length} ratings. Hover or focus a point to inspect its rating.`,
+  });
+
+  for (
+    let value = lowerRating;
+    value <= upperRating + Number.EPSILON;
+    value += 0.5
+  ) {
+    const y =
+      margin.top +
+      ((upperRating - value) / (upperRating - lowerRating)) * plotHeight;
+    svg.append(
+      createSvgElement("line", {
+        x1: margin.left,
+        x2: width - margin.right,
+        y1: y,
+        y2: y,
+        class: "rating-chart-grid rating-chart-grid-threshold",
+      }),
+    );
+    const label = createSvgElement("text", {
+      x: margin.left - 7,
+      y: y + 3,
+      "text-anchor": "end",
+      class: "rating-chart-label",
+    });
+    label.textContent = value.toFixed(1);
+    svg.append(label);
+  }
+
+  for (let year = firstYear; year <= lastYear; year += 1) {
+    const yearStart = Date.UTC(year, 0, 1);
+    if (yearStart < firstDate || yearStart > lastDate) continue;
+    const x =
+      margin.left + ((yearStart - firstDate) / (dateRange || 1)) * plotWidth;
+    svg.append(
+      createSvgElement("line", {
+        x1: x,
+        x2: x,
+        y1: margin.top,
+        y2: margin.top + plotHeight,
+        class: "rating-chart-grid",
+      }),
+    );
+    const label = createSvgElement("text", {
+      x,
+      y: height - 5,
+      "text-anchor": "middle",
+      class: "rating-chart-label",
+    });
+    label.textContent = String(year);
+    svg.append(label);
+  }
+
+  const path = createSvgElement("path", {
+    d: coordinates
+      .map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`)
+      .join(" "),
+    class: "rating-chart-line",
+  });
+  svg.append(path);
+
+  const tooltip = createSvgElement("g", {
+    class: "rating-chart-tooltip",
+    "pointer-events": "none",
+    visibility: "hidden",
+  });
+  const tooltipBackground = createSvgElement("rect", {
+    width: 116,
+    height: 30,
+    rx: 5,
+    class: "rating-chart-tooltip-background",
+  });
+  const tooltipLabel = createSvgElement("text", {
+    x: 58,
+    y: 19,
+    "text-anchor": "middle",
+    class: "rating-chart-tooltip-label",
+  });
+  tooltip.append(tooltipBackground, tooltipLabel);
+
+  function showPoint(point) {
+    const x = Math.max(
+      margin.left,
+      Math.min(width - margin.right - 116, point.x - 58),
+    );
+    const y = Math.max(margin.top, point.y - 38);
+    tooltip.setAttribute("transform", `translate(${x} ${y})`);
+    tooltipLabel.textContent = `${point.rating.toFixed(3)} · ${formatMatchDate(point.date)}`;
+    tooltip.setAttribute("visibility", "visible");
+  }
+
+  coordinates.forEach((point) => {
+    const marker = createSvgElement("circle", {
+      cx: point.x,
+      cy: point.y,
+      r: 2.5,
+      class: "rating-chart-point",
+    });
+    const hitTarget = createSvgElement("circle", {
+      cx: point.x,
+      cy: point.y,
+      r: 9,
+      class: "rating-chart-point-hit",
+      tabindex: "0",
+      role: "img",
+      "aria-label": `${type} DUPR ${point.rating.toFixed(3)} on ${formatMatchDate(point.date)}`,
+    });
+    hitTarget.addEventListener("pointerenter", () => showPoint(point));
+    hitTarget.addEventListener("focus", () => showPoint(point));
+    hitTarget.addEventListener("pointerleave", () => {
+      tooltip.setAttribute("visibility", "hidden");
+    });
+    hitTarget.addEventListener("blur", () => {
+      tooltip.setAttribute("visibility", "hidden");
+    });
+    svg.append(marker, hitTarget);
+  });
+
+  svg.append(tooltip);
+
+  chart.append(svg);
 }
 
 async function loadPlayer(playerId) {
@@ -199,6 +418,20 @@ async function loadPlayer(playerId) {
 
     renderPlayer(payload.result);
     renderHistory(result.history, String(playerId));
+    renderRatingHistory(
+      result.doublesRatingHistory,
+      "Doubles",
+      doublesRatingHistorySection,
+      doublesRatingHistoryMessage,
+      doublesRatingChart,
+    );
+    renderRatingHistory(
+      result.singlesRatingHistory,
+      "Singles",
+      singlesRatingHistorySection,
+      singlesRatingHistoryMessage,
+      singlesRatingChart,
+    );
   } catch (error) {
     if (isCurrentLoad()) {
       showError(
@@ -512,15 +745,68 @@ async function fetchPlayer(playerId) {
     }
   }
 
-  return Promise.all([
-    fetchEndpoint(endpoint),
-    fetchEndpoint(`${endpoint}/history`, "POST", {
-      filters: { eventFormat: null },
-      limit: 10,
-      offset: 0,
-      sort: { order: "DESC", parameter: "MATCH_DATE" },
-    }),
-  ]).then(([player, history]) => ({ player, history }));
+  async function fetchAllRatingHistory(type) {
+    const ratingHistory = [];
+    const limit = 100;
+    let offset = 0;
+    const today = new Date();
+    const endDate = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+
+    while (true) {
+      const page = await fetchEndpoint(`${endpoint}/rating-history`, "POST", {
+        endDate,
+        limit,
+        offset,
+        startDate: "1900-01-01",
+        sortBy: "asc",
+        type,
+      });
+      if (!page.ok) return page;
+
+      const pageHistory = page.payload?.result?.ratingHistory;
+      if (
+        page.payload?.status !== "SUCCESS" ||
+        !Array.isArray(pageHistory)
+      ) {
+        return {
+          ok: false,
+          message:
+            page.payload?.message ||
+            "DUPR returned an unexpected rating history response.",
+        };
+      }
+
+      ratingHistory.push(...pageHistory);
+      if (pageHistory.length < limit) break;
+      offset += limit;
+    }
+
+    return {
+      ok: true,
+      payload: {
+        status: "SUCCESS",
+        result: { ratingHistory },
+      },
+    };
+  }
+
+  const [player, history, doublesRatingHistory, singlesRatingHistory] =
+    await Promise.all([
+      fetchEndpoint(endpoint),
+      fetchEndpoint(`${endpoint}/history`, "POST", {
+        filters: { eventFormat: null },
+        limit: 10,
+        offset: 0,
+        sort: { order: "DESC", parameter: "MATCH_DATE" },
+      }),
+      fetchAllRatingHistory("DOUBLES"),
+      fetchAllRatingHistory("SINGLES"),
+    ]);
+  return { player, history, doublesRatingHistory, singlesRatingHistory };
 }
 
 async function loadCurrentPlayer() {

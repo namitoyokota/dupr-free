@@ -22,6 +22,10 @@ a URL like
 7. On DUPR search results, clicking a player card navigates to their profile
    page when the extension can identify their player ID from the page data.
 
+The popup also displays doubles and singles rating history charts, loading all
+available records in 100-entry pages. Hover the line or focus it and use the
+arrow keys to inspect a rating and its date.
+
 ## Fair warning
 
 I vibe-coded this project, so I have no idea what's inside this codebase.

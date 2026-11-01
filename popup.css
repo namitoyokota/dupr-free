@@ -302,6 +302,79 @@ h1 {
   gap: 10px;
 }
 
+.rating-history-section {
+  margin-top: 10px;
+}
+
+.rating-chart {
+  margin-top: 8px;
+  padding: 10px 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--card);
+}
+
+.rating-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.rating-chart-grid {
+  stroke: var(--border);
+  stroke-dasharray: 3 3;
+}
+
+.rating-chart-grid-threshold {
+  stroke: #a1a1aa;
+  stroke-dasharray: none;
+  stroke-width: 1.25;
+}
+
+.rating-chart-line {
+  fill: none;
+  stroke: #15803d;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.rating-chart-point {
+  fill: #15803d;
+  pointer-events: none;
+}
+
+.rating-chart-point-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 1;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.rating-chart-point-hit:focus {
+  outline: none;
+  fill: rgb(21 128 61 / 18%);
+  stroke: #15803d;
+}
+
+.rating-chart-tooltip-background {
+  fill: var(--foreground);
+}
+
+.rating-chart-tooltip-label {
+  fill: var(--background);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+}
+
+.rating-chart-label {
+  fill: var(--muted-foreground);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 9px;
+}
+
 .match-card {
   padding: 13px;
 }
