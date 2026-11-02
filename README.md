@@ -1,6 +1,7 @@
 # DUPR Free Chrome extension
 
-![Thumbnail](./assets/thumbnail.png)
+![Thumbnail1](./assets/thumbnail1.png)
+![Thumbnail1](./assets/thumbnail2.png)
 
 ## Why
 
