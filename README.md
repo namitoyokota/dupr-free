@@ -10,13 +10,15 @@ profile is open in the DUPR dashboard. It runs when you click the extension on
 a URL like
 `https://dashboard.dupr.com/dashboard/player/4915220849`.
 
-## Install for local use
+## Install from the ZIP
 
-1. Open `chrome://extensions`.
-2. Turn on **Developer mode**.
-3. Choose **Load unpacked** and select this `extension` folder.
-4. Open a player profile on `dashboard.dupr.com` while signed in.
-5. Click **DUPR Free** extension icon for some magic.
+1. [Download the latest ZIP](https://github.com/namitoyokota/dupr-free/archive/refs/heads/main.zip).
+2. Unzip the downloaded file.
+3. Open Chrome.
+4. Navigate to `chrome://extensions`.
+5. Turn on **DEveloper mode**.
+6. Choose **Load unpacked** and select the `dupr-free-main` folder.
+7. Open DUPR and click the **DUPR Free** extension icon.
 
 ## Fair warning
 
