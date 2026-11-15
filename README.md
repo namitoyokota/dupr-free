@@ -16,7 +16,7 @@ a URL like
 2. Unzip the downloaded file.
 3. Open Chrome.
 4. Navigate to `chrome://extensions`.
-5. Turn on **DEveloper mode**.
+5. Turn on **Developer mode**.
 6. Choose **Load unpacked** and select the `dupr-free-main` folder.
 7. Open DUPR and click the **DUPR Free** extension icon.
 
