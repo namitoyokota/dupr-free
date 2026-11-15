@@ -16,16 +16,7 @@ a URL like
 2. Turn on **Developer mode**.
 3. Choose **Load unpacked** and select this `extension` folder.
 4. Open a player profile on `dashboard.dupr.com` while signed in.
-5. Click the extensions puzzle icon and pin **DUPR Free** if desired.
-6. Click **DUPR Free** to show that player's details, ratings, and match history.
-   Click a player in match history to update the popup with their profile
-   without navigating the dashboard tab.
-7. On DUPR search results, clicking a player card navigates to their profile
-   page when the extension can identify their player ID from the page data.
-
-The popup also displays doubles and singles rating history charts, loading all
-available records in 100-entry pages. Hover the line or focus it and use the
-arrow keys to inspect a rating and its date.
+5. Click **DUPR Free** extension icon for some magic.
 
 ## Fair warning
 
