@@ -821,7 +821,7 @@ async function fetchPlayer(playerId) {
       fetchEndpoint(endpoint),
       fetchEndpoint(`${endpoint}/history`, "POST", {
         filters: { eventFormat: null },
-        limit: 10,
+        limit: 25,
         offset: 0,
         sort: { order: "DESC", parameter: "MATCH_DATE" },
       }),
